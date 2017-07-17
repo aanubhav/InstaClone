@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect   
 from forms import SignUpForm, LoginForm
 from models import UserModel,SessionToken
 from django.contrib.auth.hashers import make_password, check_password
