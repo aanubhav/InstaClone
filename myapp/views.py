@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.shortcuts import render, redirect   
+from django.shortcuts import render, redirect
 from forms import SignUpForm, LoginForm
 from models import UserModel,SessionToken
 from django.contrib.auth.hashers import make_password, check_password
@@ -50,3 +50,15 @@ def login_view(request):
 
     response_data['form'] = form
     return render(request, 'login.html', response_data)
+
+
+# For validating the session
+def check_validation(request):
+    if request.COOKIES.get('session_token'):
+        session = SessionToken.objects.filter(session_token=request.COOKIES.get('session_token')).first()
+        if session:
+            #time_to_live = session.created_on + timedelta(days=1)
+            if True:  # time_to_live > timezone.now():
+                return session.user
+    else:
+        return None
