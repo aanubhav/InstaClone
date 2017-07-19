@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from imgurpython import ImgurClient
 from django.shortcuts import render, redirect
 from forms import SignUpForm, LoginForm, PostForm
-from models import UserModel, SessionToken, PostModel
+from models import UserModel, SessionToken, PostModel, LikeModel
 from django.contrib.auth.hashers import make_password, check_password
 from instaclone.settings import BASE_DIR
 
@@ -68,7 +68,7 @@ def check_validation(request):
 def post_view(request):
     user = check_validation(request)
     if user:
-
+        import pdb; pdb.set_trace()
         if request.method == 'POST':
             form = PostForm(request.POST, request.FILES)
             if form.is_valid():
@@ -92,7 +92,15 @@ def post_view(request):
 def feed_view(request):
     user = check_validation(request)
     if user:
+
         posts = PostModel.objects.all().order_by('created_on')
-        return render(request, 'feed.html', {})
+
+        for post in posts:
+            existing_like = LikeModel.objects.filter(post_id=post.id, user=user).first()
+            if existing_like:
+                post.has_liked = True
+
+        return render(request, 'feed.html', {'posts': posts})
     else:
+
         return redirect('/login/')

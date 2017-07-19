@@ -36,3 +36,9 @@ class PostModel(models.Model):
     has_liked = False
 
 
+class LikeModel(models.Model):
+    user = models.ForeignKey(UserModel)
+    post = models.ForeignKey(PostModel)
+    created_on = models.DateTimeField(auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
+
