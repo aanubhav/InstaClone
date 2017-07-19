@@ -2,8 +2,8 @@
 from __future__ import unicode_literals
 from imgurpython import ImgurClient
 from django.shortcuts import render, redirect
-from forms import SignUpForm, LoginForm, PostForm
-from models import UserModel, SessionToken, PostModel, LikeModel
+from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm
+from models import UserModel, SessionToken, PostModel, LikeModel, CommentModel
 from django.contrib.auth.hashers import make_password, check_password
 from instaclone.settings import BASE_DIR
 
@@ -104,3 +104,35 @@ def feed_view(request):
     else:
 
         return redirect('/login/')
+
+
+def like_view(request):
+    user = check_validation(request)
+    if user and request.method == 'POST':
+        form = LikeForm(request.POST)
+        if form.is_valid():
+            post_id = form.cleaned_data.get('post').id
+            existing_like = LikeModel.objects.filter(post_id=post_id, user=user).first()
+            if not existing_like:
+                LikeModel.objects.create(post_id=post_id, user=user)
+            else:
+                existing_like.delete()
+            return redirect('/feed/')
+    else:
+        return redirect('/login/')
+
+
+def comment_view(request):
+    user = check_validation(request)
+    if user and request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            post_id = form.cleaned_data.get('post').id
+            comment_text = form.cleaned_data.get('comment_text')
+            comment = CommentModel.objects.create(user=user, post_id=post_id, comment_text=comment_text)
+            comment.save()
+            return redirect('/feed/')
+        else:
+            return redirect('/feed/')
+    else:
+        return redirect('/login')
