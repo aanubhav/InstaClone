@@ -8,9 +8,11 @@ from django.contrib.auth.hashers import make_password, check_password
 from instaclone.settings import BASE_DIR
 import sendgrid
 from sendgrid.helpers.mail import *
-from sg import apikey, my_email, imgur_id, secret
+from sg import apikey, my_email, imgur_id, secret, clarif_key
 from datetime import timedelta
 from django.utils import timezone
+import clarifai
+from clarifai.rest import ClarifaiApp
 
 # Create your views here.
 
@@ -97,7 +99,16 @@ def post_view(request):
                 path = str(BASE_DIR + '/' + post.image.url)
                 client = ImgurClient(imgur_id, secret)
                 post.image_url = client.upload_from_path(path, anon=True)['link']
-                post.save()
+                # post.save()
+
+                # classification of images
+                app = ClarifaiApp(api_key=clarif_key)
+                model = app.models.get('general-v1.3')
+                response = model.predict_by_url(url=post.image_url)
+                value = response['outputs'][0]['data']['concepts'][0]['value']
+                if value > 0.9:  # if post is about garbage 
+                    post.save()
+
                 return redirect('/feed/')
 
         else:
@@ -133,6 +144,18 @@ def like_view(request):
             existing_like = LikeModel.objects.filter(post_id=post_id, user=user).first()
             if not existing_like:
                 LikeModel.objects.create(post_id=post_id, user=user)
+
+                # mail to the user about the new like
+
+                post = form.cleaned_data.get('post')
+                email = post.user.email
+                sg = sendgrid.SendGridAPIClient(apikey=apikey)
+                from_email = Email(my_email)
+                to_email = Email(email)
+                subject = "Swacch Bharat"
+                content = Content("text/plain", "you have a new like")
+                mail = Mail(from_email, subject, to_email, content)
+                sg.client.mail.send.post(request_body=mail.get())
             else:
                 existing_like.delete()
             return redirect('/feed/')
