@@ -6,6 +6,9 @@ from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm
 from models import UserModel, SessionToken, PostModel, LikeModel, CommentModel
 from django.contrib.auth.hashers import make_password, check_password
 from instaclone.settings import BASE_DIR
+import sendgrid
+from sendgrid.helpers.mail import *
+from sg import apikey, my_email
 
 # Create your views here.
 
@@ -15,11 +18,24 @@ def signup_view(request):
         form = SignUpForm(request.POST)
         if form.is_valid():
             username = form.cleaned_data['username']
-            name = form.cleaned_data['name']
-            email = form.cleaned_data['email']
-            password = form.cleaned_data['password']
-            user = UserModel(name=name, password=make_password(password), email=email, username=username)
-            user.save()
+            if len(username) > 6:
+                # extra parameters for signup
+                name = form.cleaned_data['name']
+                email = form.cleaned_data['email']
+                password = form.cleaned_data['password']
+                if len(password) >= 8:
+                    # password must be at least 8 characters long
+                    user = UserModel(name=name, password=make_password(password), email=email, username=username)
+                    user.save()
+                    # sending a welcome mail to new user
+                    sg = sendgrid.SendGridAPIClient(apikey=apikey)
+                    from_email = Email(my_email)
+                    to_email = Email(email)
+                    subject = "Swacch Bharat"
+                    content = Content("text/plain", "you are successfully signed up for Swacch Bharat")
+                    mail = Mail(from_email, subject, to_email, content)
+                    sg.client.mail.send.post(request_body=mail.get())
+
             return render(request, 'success.html')
     else:
         form = SignUpForm()
