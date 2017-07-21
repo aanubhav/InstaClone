@@ -9,7 +9,8 @@ from instaclone.settings import BASE_DIR
 import sendgrid
 from sendgrid.helpers.mail import *
 from sg import apikey, my_email
-from datetime.datetime import
+from datetime import timedelta
+from django.utils import timezone
 
 # Create your views here.
 
@@ -75,8 +76,8 @@ def check_validation(request):
     if request.COOKIES.get('session_token'):
         session = SessionToken.objects.filter(session_token=request.COOKIES.get('session_token')).first()
         if session:
-            #time_to_live = session.created_on + timedelta(days=1)
-            if True:  # time_to_live > timezone.now():
+            time_to_live = session.created_on + timedelta(days=1)
+            if time_to_live > timezone.now():
                 return session.user
     else:
         return None
