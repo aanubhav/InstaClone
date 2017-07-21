@@ -8,7 +8,7 @@ from django.contrib.auth.hashers import make_password, check_password
 from instaclone.settings import BASE_DIR
 import sendgrid
 from sendgrid.helpers.mail import *
-from sg import apikey, my_email
+from sg import apikey, my_email, imgur_id, secret
 from datetime import timedelta
 from django.utils import timezone
 
@@ -86,7 +86,7 @@ def check_validation(request):
 def post_view(request):
     user = check_validation(request)
     if user:
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         if request.method == 'POST':
             form = PostForm(request.POST, request.FILES)
             if form.is_valid():
@@ -95,7 +95,7 @@ def post_view(request):
                 post = PostModel(user=user, image=image, caption=caption)
                 post.save()
                 path = str(BASE_DIR + '/' + post.image.url)
-                client = ImgurClient('e802e991ac9cc43', '185840da96ddd800f64ffc3099f8cc8500c6e511')
+                client = ImgurClient(imgur_id, secret)
                 post.image_url = client.upload_from_path(path, anon=True)['link']
                 post.save()
                 return redirect('/feed/')
@@ -149,6 +149,19 @@ def comment_view(request):
             comment_text = form.cleaned_data.get('comment_text')
             comment = CommentModel.objects.create(user=user, post_id=post_id, comment_text=comment_text)
             comment.save()
+            post = form.cleaned_data.get('post')
+            email = post.user.email
+            #print email
+
+            # sending email to user who created the post about the comment
+            sg = sendgrid.SendGridAPIClient(apikey=apikey)
+            from_email = Email(my_email)
+            to_email = Email(email)
+            subject = "Swacch Bharat-new comment"
+            content = Content("text/plain", "you have a new comment :" + comment_text)
+            mail = Mail(from_email, subject, to_email, content)
+            sg.client.mail.send.post(request_body=mail.get())
+
             return redirect('/feed/')
         else:
             return redirect('/feed/')
