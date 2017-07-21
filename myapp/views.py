@@ -9,6 +9,7 @@ from instaclone.settings import BASE_DIR
 import sendgrid
 from sendgrid.helpers.mail import *
 from sg import apikey, my_email
+from datetime.datetime import
 
 # Create your views here.
 
@@ -152,3 +153,12 @@ def comment_view(request):
             return redirect('/feed/')
     else:
         return redirect('/login')
+
+
+def logout_view(request):
+    if request.method == 'GET':
+        if request.COOKIES.get('session_token'):
+            SessionToken.objects.filter(session_token = request.COOKIES.get('session_token')).first().delete()
+        return redirect('/login/')
+    else:
+        return redirect('/feed/')

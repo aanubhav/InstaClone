@@ -5,8 +5,26 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style>
+    body{
+            text-align:center;
+            padding: 0px 0px 0px 0px;
+            margin:0px
+        }
+    .change_i{
+            text-align:right;
+            margin:20px 40px -50px 0px;
+        }
+     </style>
 </head>
+
 <body>
+
+    <form class="change_i" method="get" action="/logout/">
+        {% csrf_token %}
+        <input style type="submit" class="btn-default btn" value="Logout">
+    </form>
+
     <form method="post" action="/post/">
         {% csrf_token %}
         <input type="submit" class="btn-default btn" value="Create Post">
