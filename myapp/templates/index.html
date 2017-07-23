@@ -4,43 +4,82 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Instagram Clone</title>
+    <title>SignUp</title>
+    <link href="https://fonts.googleapis.com/css?family=Nova+Mono" rel="stylesheet">
+    <style>
+        h1{
+            margin: 0px;
+            font-family: 'Nova Mono', monospace;
+            font-size:40px;
+        }
+        h3{
+            margin: 0px;
+            font-family: 'Nova Mono', monospace;
+            font-size:20px;
+        }
+        body{
+            background-image: url("swachhbharat_index.jpg");
+            text-align:center;
+            background-size: cover;
+            padding:0px;
+        }
+        table{
+            margin:0px auto;
+            padding:20px;
+        }
+        .row{
+            padding: 5px;
+        }
+    </style>
 </head>
 <body>
-	<div class="main">
-            <h1> Instagram Clone</h1>
-            <h3>Sign Up</h3>
+	<div class="main"><br><br>
+            <h1> SwachhBharat:SignUp</h1>
+
     </div>
 
-    <div>
-        <form method="post">
+    <div >
+        <form method="post"><br><br>
             {% csrf_token %}
-
-            <div>
-                <label for="username">Username: </label>
-                <input id="username" type="text" name="username" value={{ username }}>
-            </div>
-
-            <div>
-                <label for="name">Name: </label>
-                <input id="name" type="text" name="name" value={{ name }}>
-            </div>
-
-            <div>
-                <label for="email">Email: </label>
-                <input id="email" type="text" name="email" value={{ email }}>
-            </div>
-
-            <div>
-                <label for="password">Password: </label>
-                <input id="password" type="password" name="password" value={{ password }}>
-            </div>
-                <input type="submit" value="Sign Up">
+            <table style="font-family: Arial; padding: 10px;">
+                <tr>
+                    <td class="row">
+                        <label for="username">Username: </label>
+                    </td>
+                    <td class = "row">
+                        <input id="username" type="text" name="username" value={{ username }}>
+                    </td>
+                </tr>
+                <tr>
+                    <td class = "row">
+                        <label for="name">Name: </label>
+                    </td>
+                    <td class = "row">
+                        <input id="name" type="text" name="name" value={{ name }}>
+                    </td>
+                </tr>
+                <tr>
+                    <td class = "row">
+                        <label for="email">Email: </label>
+                    </td>
+                    <td class = "row">
+                        <input id="email" type="text" name="email" value={{ email }}>
+                    </td>
+                </tr>
+                <tr>
+                    <td class = "row">
+                        <label for="password">Password: </label>
+                    </td>
+                    <td class = "row">
+                        <input id="password" type="password" name="password" value={{ password }}>
+                    </td>
+                </tr>
+            </table><br>
+            <input type="submit" value="Sign Up">
         </form>
-
 
     </div><br><br>
 
-    <div><h3>Already a user?</h3><a href="login/">Login</a> </div>
+    <div><h3>Already a user?&nbsp;&nbsp;&nbsp;&nbsp;<span><a href="login/">login</a></span></h3> </div>
 </body>
 </html>
