@@ -84,7 +84,7 @@ def check_validation(request):
     else:
         return None
 
-
+    
 def post_view(request):
     user = check_validation(request)
     if user:
@@ -208,6 +208,7 @@ def logout_view(request):
         return redirect('/feed/')
 
 
+# method for upvoting comments
 def Upvote_view(request):
     user = check_validation(request)
     if user and request.method == 'POST':
