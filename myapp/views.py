@@ -217,7 +217,6 @@ def Upvote_view(request):
         if form.is_valid():
             response_data = {}
             comment_id = form.cleaned_data.get('comment')
-            response_data['to_email'] = form.cleaned_data.get('comment').user.email
             upvoted = UpvoteModel.objects.filter(comment_id=comment_id, user=user).first()
 
             if not upvoted:
