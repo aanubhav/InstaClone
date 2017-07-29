@@ -2,8 +2,8 @@
 from __future__ import unicode_literals
 from imgurpython import ImgurClient
 from django.shortcuts import render, redirect
-from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm
-from models import UserModel, SessionToken, PostModel, LikeModel, CommentModel
+from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm, UpvoteForm
+from models import UserModel, SessionToken, PostModel, LikeModel, CommentModel, UpvoteModel
 from django.contrib.auth.hashers import make_password, check_password
 from instaclone.settings import BASE_DIR
 import sendgrid
@@ -102,12 +102,13 @@ def post_view(request):
                 # post.save()
 
                 # classification of images
+
                 app = ClarifaiApp(api_key=clarif_key)
                 model = app.models.get('general-v1.3')
                 response = model.predict_by_url(url=post.image_url)
                 value = response['outputs'][0]['data']['concepts'][0]['value']
-                if value > 0.9:  # if post is about garbage 
-                    post.save()
+                if value > 0.9:  # if post is about garbage
+                post.save()
 
                 return redirect('/feed/')
 
@@ -126,8 +127,14 @@ def feed_view(request):
 
         for post in posts:
             existing_like = LikeModel.objects.filter(post_id=post.id, user=user).first()
+
             if existing_like:
                 post.has_liked = True
+
+            for comment in post.comments:
+                upvoted = UpvoteModel.objects.filter(comment=comment.id, user=user).first()
+                if upvoted:
+                    comment.has_upvoted = True
 
         return render(request, 'feed.html', {'posts': posts})
     else:
@@ -199,3 +206,33 @@ def logout_view(request):
         return redirect('/login/')
     else:
         return redirect('/feed/')
+
+
+def Upvote_view(request):
+    user = check_validation(request)
+    if user and request.method == 'POST':
+
+        form = UpvoteForm(request.POST)
+
+        if form.is_valid():
+            response_data = {}
+            comment_id = form.cleaned_data.get('comment')
+            response_data['to_email'] = form.cleaned_data.get('comment').user.email
+            upvoted = UpvoteModel.objects.filter(comment_id=comment_id, user=user).first()
+
+            if not upvoted:
+                UpvoteModel.objects.create(comment=comment_id, user=user)
+                response_data['subject'] = 'Upvoted'
+                response_data['content'] = 'Comment upvoted by :' + form.cleaned_data.get('comment').user.name
+
+            else:
+                upvoted.delete()
+                response_data['subject'] = 'Downvoted'
+                response_data['content'] = 'Comment downvoted by ' + form.cleaned_data.get('comment').user.name
+
+            return redirect('/feed/')
+
+    else:
+
+        return redirect('/login/')
+
